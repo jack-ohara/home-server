@@ -22,7 +22,8 @@ const server = Bun.serve({
 
         if (request.method === "GET") {
           const measurements = await getAllMeasurments();
-          return Response.json({}, { status: 200 });
+
+          return Response.json(measurements, { status: 200 });
         }
 
         return Response.json(
