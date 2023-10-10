@@ -1,0 +1,3 @@
+*.sql
+*.tar
+node_modules
