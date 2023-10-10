@@ -31,9 +31,9 @@ export async function getAllMeasurments() {
     password: process.env.DB_PASSWORD,
   });
 
-  const result = await connection.execute(
+  const [rows] = await connection.execute(
     "SELECT * FROM `home-data`.`temperature-readings` ORDER BY timestamp"
   );
 
-  console.log({ result: JSON.stringify(result, null, 2) });
+  console.log({ result: JSON.stringify(rows, null, 2) });
 }
