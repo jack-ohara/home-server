@@ -35,5 +35,5 @@ export async function getAllMeasurments() {
     "SELECT * FROM `home-data`.`temperature-readings` ORDER BY timestamp"
   );
 
-  console.log({ result });
+  console.log({ result: JSON.stringify(result, null, 2) });
 }
