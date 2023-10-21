@@ -27,7 +27,6 @@ bool logTemperature() {
     }
     Serial.println("Wifi connected");
   }
-  
 
   sensors.requestTemperatures(); 
   float temperatureC = sensors.getTempCByIndex(0);
