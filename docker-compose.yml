@@ -1,41 +1,41 @@
 services:
   backend:
-    image: home-server:latest
+    image: infinitepumpkin/home-server:latest
     ports:
       - 3333:3333
-    networks:
-      - home-server-network
     environment:
-      - DB_HOST=unknown
-      - DB_USER=root
-      - DB_PASSWORD=/run/secrets/db-password
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD_FILE: /run/secrets/db_password
     secrets:
       - db-password
 
   db:
     image: mysql:latest
     ports:
-      - 3335:3306
-    networks:
-      - home-server-network
+      - 5123:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=/run/secrets/db-password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - home-server-data:/var/lib/mysql
     secrets:
-      - db-password
+      - db_password
 
   dashboard:
     image: metabase/metabase:latest
     ports:
       - 3334:3000
-    networks:
-      - home-server-network
     environment:
-      - MB_DB_FILE=/metabase-data/metabase.db
+      MB_DB_FILE: /metabase-data/metabase.db
     volumes:
       - home-server-metabase-data:/metabase-data
 
 secrets:
-  db-password:
-    file: ./db-password.txt
+  db_password:
+    file: db-password.txt
+
+volumes:
+  home-server-data:
+    external: true
+  home-server-metabase-data:
+    external: true

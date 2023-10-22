@@ -1,3 +1,4 @@
+import { readFile } from "fs/promises";
 import { createConnection } from "mysql2/promise";
 
 export type Measurment = {
@@ -6,10 +7,11 @@ export type Measurment = {
 };
 
 export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
+  const password = await readFile(process.env.DB_PASSWORD_FILE!);
   const connection = await createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
+    password: password.toString(),
   });
 
   await connection.execute(
