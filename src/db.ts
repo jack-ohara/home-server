@@ -8,6 +8,7 @@ export type Measurment = {
 
 export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
   const password = await readFile(process.env.DB_PASSWORD_FILE!);
+  console.log({ password: password.toString() });
   const connection = await createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
