@@ -9,12 +9,13 @@ export type Measurment = {
 async function getConnection() {
   try {
     const password = await readFile(process.env.DB_PASSWORD_FILE!);
-    console.log({ password: password.toString() });
-    return await createConnection({
+    const connectionOptions = {
       host: process.env.DB_HOST,
       user: process.env.DB_USERNAME,
       password: password.toString(),
-    });
+    };
+
+    return await createConnection(connectionOptions);
   } catch (e) {
     console.error({ error: e });
     throw e;
