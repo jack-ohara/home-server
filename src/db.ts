@@ -6,14 +6,18 @@ export type Measurment = {
   tempCelsius: Number;
 };
 
-export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
+async function getConnection() {
   const password = await readFile(process.env.DB_PASSWORD_FILE!);
   console.log({ password: password.toString() });
-  const connection = await createConnection({
+  return await createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: password.toString(),
   });
+}
+
+export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
+  const connection = await getConnection();
 
   await connection.execute(
     "INSERT INTO `home-data`.`temperature-readings`" +
@@ -28,11 +32,7 @@ export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
 }
 
 export async function getAllMeasurments() {
-  const connection = await createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-  });
+  const connection = await getConnection();
 
   const [rows] = await connection.execute(
     "SELECT * FROM `home-data`.`temperature-readings` ORDER BY timestamp"
