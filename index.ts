@@ -14,6 +14,22 @@ type TemperaturePayload = {
 
 config();
 
+type GenerateResponseArgs = {
+  status: number;
+  body?: any;
+};
+
+const generateResponse = ({ status, body }: GenerateResponseArgs) => {
+  const response = Response.json(body, { status });
+  response.headers.set("Access-Control-Allow-Origin", "http://jack-serv.local");
+  response.headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  return response;
+};
+
 const server = Bun.serve({
   port: 3333,
   async fetch(request) {
@@ -26,19 +42,19 @@ const server = Bun.serve({
 
           await addMeasurment(payload);
 
-          return new Response(undefined, { status: 204 });
+          return generateResponse({ status: 204 });
         }
 
         if (request.method === "GET") {
           const measurements = await getAllMeasurments();
 
-          return Response.json(measurements, { status: 200 });
+          return generateResponse({ status: 200, body: measurements });
         }
 
-        return Response.json(
-          { message: "Endpoint does not support method" },
-          { status: 405 }
-        );
+        return generateResponse({
+          status: 405,
+          body: { message: "Endpoint does not support method" },
+        });
       }
 
       case "/weight": {
@@ -47,21 +63,21 @@ const server = Bun.serve({
 
           await addWeight(payload);
 
-          return new Response(undefined, { status: 204 });
+          return generateResponse({ status: 204 });
         }
 
         if (request.method === "GET") {
           const weights = await getAllWeights();
 
-          return Response.json(weights, { status: 200 });
+          return generateResponse({ status: 200, body: weights });
         }
       }
 
       default: {
-        return Response.json(
-          { messaage: `Endpoint '${url.pathname}' is not supported` },
-          { status: 404 }
-        );
+        return generateResponse({
+          status: 404,
+          body: { messaage: `Endpoint '${url.pathname}' is not supported` },
+        });
       }
     }
   },
