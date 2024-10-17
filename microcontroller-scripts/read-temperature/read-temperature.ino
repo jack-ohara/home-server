@@ -37,7 +37,7 @@ bool logTemperature() {
   http.begin(client, SECRET_TEMPERATURE_ENDPOINT);
   http.addHeader("Content-Type", "application/json");
 
-  int httpResponseCode = http.POST("{\"tempCelsius\": " + String(temperatureC) + ", \"locationName\": \"jacks-office\"}");
+  int httpResponseCode = http.POST("{\"tempCelsius\": " + String(temperatureC) + ", \"locationName\": \"leander-room\"}");
 
   Serial.println("Response code: " + String(httpResponseCode));
 

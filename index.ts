@@ -1,9 +1,18 @@
-import { addMeasurment, getAllMeasurments } from "$db";
+import {
+  addMeasurment,
+  addWeight,
+  getAllMeasurments,
+  getAllWeights,
+  WeightPayload,
+} from "$db";
+import { config } from "dotenv";
 
 type TemperaturePayload = {
   tempCelsius: number;
   locationName: string;
 };
+
+config();
 
 const server = Bun.serve({
   port: 3333,
@@ -30,6 +39,22 @@ const server = Bun.serve({
           { message: "Endpoint does not support method" },
           { status: 405 }
         );
+      }
+
+      case "/weight": {
+        if (request.method === "POST") {
+          const payload = (await request.json()) as WeightPayload;
+
+          await addWeight(payload);
+
+          return new Response(undefined, { status: 204 });
+        }
+
+        if (request.method === "GET") {
+          const weights = await getAllWeights();
+
+          return Response.json(weights, { status: 200 });
+        }
       }
 
       default: {

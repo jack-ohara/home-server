@@ -1,48 +1,77 @@
-import { readFile } from "fs/promises";
-import { createConnection } from "mysql2/promise";
+import { Collection, Document, MongoClient } from "mongodb";
 
 export type Measurment = {
   locationName: string;
   tempCelsius: Number;
 };
 
-async function getConnection() {
-  try {
-    const password = await readFile(process.env.DB_PASSWORD_FILE!);
-    const connectionOptions = {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USERNAME,
-      password: password.toString(),
-    };
+export type WeightPayload = {
+  weightKg: number;
+  date: Date;
+  name: string;
+};
 
-    return await createConnection(connectionOptions);
-  } catch (e) {
-    console.error({ error: e });
-    throw e;
+type CollectionName = "temp-readings" | "weights";
+
+async function executeInDb<TResult>(
+  callback: (collection: Collection<Document>) => Promise<TResult>,
+  collectionName: CollectionName,
+  dbName = "home-data"
+) {
+  const client = new MongoClient(process.env.MONGODB_CONNECTION_STRING!);
+
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+
+    const result = await callback(collection);
+    return result;
+  } finally {
+    await client.close();
   }
 }
 
 export async function addMeasurment({ locationName, tempCelsius }: Measurment) {
-  const connection = await getConnection();
+  const result = await executeInDb(async (collection) => {
+    const document = {
+      metadata: {
+        location: locationName,
+      },
+      timestamp: new Date(),
+      tempCelsius,
+    };
 
-  await connection.execute(
-    "INSERT INTO `home-data`.`temperature-readings`" +
-      "(`location-id`, `timestamp`, `temp-celsius`) " +
-      "VALUES (" +
-      "(SELECT id FROM `home-data`.locations WHERE `name` = ?)," +
-      "NOW()," +
-      "?" +
-      ")",
-    [locationName, tempCelsius]
-  );
+    return await collection.insertOne(document);
+  }, "temp-readings");
+
+  console.log(`Inserted temp reading into db: ${JSON.stringify(result)}`);
 }
 
 export async function getAllMeasurments() {
-  const connection = await getConnection();
+  return executeInDb(async (collection) => {
+    return collection.find().toArray();
+  }, "temp-readings") as unknown as Measurment[];
+}
 
-  const [rows] = await connection.execute(
-    "SELECT * FROM `home-data`.`temperature-readings` ORDER BY timestamp DESC"
-  );
+export async function addWeight({ weightKg, date, name }: WeightPayload) {
+  const result = await executeInDb(async (collection) => {
+    const document = {
+      metadata: {
+        name,
+      },
+      weightKg,
+      date,
+    };
 
-  return rows as Measurment[];
+    return await collection.insertOne(document);
+  }, "weights");
+
+  console.log(`Inserted weight into db: ${JSON.stringify(result)}`);
+}
+
+export async function getAllWeights() {
+  return executeInDb(async (collection) => {
+    return collection.find().toArray();
+  }, "weights") as Promise<any[]>;
 }

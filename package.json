@@ -10,9 +10,14 @@
   },
   "scripts": {
     "start": "bun index.ts",
-    "dev": "bun --hot index.ts"
+    "dev": "bun --hot index.ts",
+    "build:latest": "docker build . -t infinitepumpkin/home-server:latest",
+    "push:latest": "docker push infinitepumpkin/home-server:latest",
+    "build-and-push": "npm run build:latest && npm run push:latest"
   },
   "dependencies": {
-    "mysql2": "^3.6.1"
+    "@types/mongodb": "^4.0.7",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.8.0"
   }
 }
