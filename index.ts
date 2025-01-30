@@ -21,7 +21,10 @@ type GenerateResponseArgs = {
 
 const generateResponse = ({ status, body }: GenerateResponseArgs) => {
   const response = Response.json(body, { status });
-  response.headers.set("Access-Control-Allow-Origin", "http://jack-serv.local");
+  response.headers.set(
+    "Access-Control-Allow-Origin",
+    "https://weight-entry.jackohara.io"
+  );
   response.headers.set(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
